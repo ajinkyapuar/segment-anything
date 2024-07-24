@@ -41,17 +41,17 @@ def segment_image():
 
         # Visualize the masks
         mask_visualization = mask_annotator.annotate(black_image, detections)
-        print(mask_visualization.shape)
+        # print(mask_visualization.shape)
 
         # Save the mask visualization to a file
-        cv2.imwrite("./test.png", mask_visualization)
+        # cv2.imwrite("./test.png", mask_visualization)
 
         # Convert the color mask image to a base64-encoded string
-        color_mask_base64 = image_to_base64(mask_visualization)
+        # color_mask_base64 = image_to_base64(mask_visualization)
 
         # Process segmentation results as needed
 
-        return jsonify({"result": "Segmentation successful", "color_mask_base64": color_mask_base64})
+        return jsonify({"result": "Segmentation successful", "segment": mask_visualization.tolist()})
     except Exception as e:
         return jsonify({"error": str(e)})
 
@@ -64,6 +64,14 @@ if __name__ == '__main__':
     sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
     sam.to(device=device)
 
-    mask_generator = SamAutomaticMaskGenerator(sam)
+    mask_generator = SamAutomaticMaskGenerator(
+        model=sam,
+        points_per_side=32,
+        pred_iou_thresh=0.86,
+        stability_score_thresh=0.92,
+        crop_n_layers=1,
+        crop_n_points_downscale_factor=2,
+        min_mask_region_area=100,  # Requires open-cv to run post-processing)
+        )
 
-    app.run(debug=True)
+    app.run(debug=True, port=7000)

@@ -1,0 +1,1 @@
+python scripts/amg.py --checkpoint models/sam_vit_b_01ec64.pth --model-type vit_b --input input/dog.jpg --output output/
